@@ -63,7 +63,7 @@ public class OptimalPartitionXAxisDist {
         int AllXPart[][][] = null;
         double I[][] = null;
         int numsGrid[][] = null;
-        DistMemCache distRead = null;
+        DistMemCache distRead = new DistMemCache();
         ArrayList<DataPair> points = null;
         ArrayList<DataPair> SortedByX = null;
         ArrayList<DataPair> SortedByY = null;
@@ -112,7 +112,6 @@ public class OptimalPartitionXAxisDist {
             I = new double[xpart][xpart];
             numsGrid = new int[xpart][xpart];
 
-            distRead = new DistMemCache();
 
             for (dividerY = reducers; dividerY < B / reducers; dividerY++) {
 
