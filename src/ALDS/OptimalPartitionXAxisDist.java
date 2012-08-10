@@ -106,9 +106,13 @@ public class OptimalPartitionXAxisDist {
             Collections.sort(this.SortedByY, new DataPairYComparator());
 
             int xpart = B/reducers + 2;
+            System.out.println("XPART: " + xpart);
+            
             AllXPart = new int[xpart][xpart][xpart];
             I = new double[xpart][xpart];
             numsGrid = new int[xpart][xpart];
+
+            distRead = new DistMemCache();
 
             for (dividerY = reducers; dividerY < B / reducers; dividerY++) {
 
@@ -117,7 +121,6 @@ public class OptimalPartitionXAxisDist {
                 this.Q = new ArrayList<Double>();
                 this.Q.add(0 - Double.MAX_VALUE);
 
-                distRead = new DistMemCache();
                 for (int start = 0; start < dividerY; start++) {
                     Object w = distRead.get(dividerY + ":" + String.valueOf(start));
                     if (w != null) {
