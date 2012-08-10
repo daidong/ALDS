@@ -76,6 +76,7 @@ public class Driver{
 
         YDistJob.setMapperClass(EquiPartitionYAxisDist.MapClassY1.class);
         YDistJob.setReducerClass(EquiPartitionYAxisDist.ReduceClassY1.class);
+        YDistJob.setNumReduceTasks(Driver.reducers);
 
         YDistJob.setMapOutputKeyClass(IntWritable.class);
         YDistJob.setMapOutputValueClass(DataPair.class);
@@ -96,6 +97,7 @@ public class Driver{
 
         YJoinJob.setMapperClass(EquiPartitionYAxisJoin.MapClassY2.class);
         YJoinJob.setReducerClass(EquiPartitionYAxisJoin.ReduceClassY2.class);
+        YJoinJob.setNumReduceTasks(Driver.reducers);
 
         YJoinJob.setInputFormatClass(SequenceFileInputFormat.class);
         YJoinJob.setMapOutputKeyClass(IntWritable.class);
@@ -123,6 +125,7 @@ public class Driver{
 
         XDistJob.setMapperClass(OptimalPartitionXAxisDist.MapClassX1.class);
         XDistJob.setReducerClass(OptimalPartitionXAxisDist.ReduceClassX1.class);
+        XDistJob.setNumReduceTasks(Driver.reducers);
 
         XDistJob.setMapOutputKeyClass(IntWritable.class);
         XDistJob.setMapOutputValueClass(DataPair.class);
@@ -145,6 +148,7 @@ public class Driver{
 
         XJoinJob.setMapperClass(OptimalPartitionXAxisJoin.MapClassX2.class);
         XJoinJob.setReducerClass(OptimalPartitionXAxisJoin.ReduceClassX2.class);
+        XJoinJob.setNumReduceTasks(Driver.reducers);
 
         XJoinJob.setInputFormatClass(SequenceFileInputFormat.class);
         XJoinJob.setMapOutputKeyClass(IntWritable.class);
