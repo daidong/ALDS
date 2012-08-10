@@ -77,8 +77,6 @@ public class EquiPartitionYAxisDist {
             }
             Collections.sort(sortedPoints);
             
-            ArrayList<DataPair> Q = new ArrayList<DataPair>();
-            ArrayList<Integer> S = new ArrayList<Integer>();
             
             for (dividerY = reducers; dividerY < B/reducers; dividerY++){
                 i = 0;
@@ -87,8 +85,8 @@ public class EquiPartitionYAxisDist {
                 int desiredRowSize = equalSliceSize;
                 int currRowSize = 0;
                 int size = sortedPoints.size();
-                Q.clear();
-                S.clear();
+                ArrayList<DataPair> Q = new ArrayList<DataPair>();
+                ArrayList<Integer> S = new ArrayList<Integer>();
                 
                 while (i < size) {
                     int s = 0;
