@@ -82,14 +82,16 @@ public class OptimalPartitionXAxisDist {
             int dividerY = 0;
 
             this.points = new ArrayList<DataPair>();
-            this.nodes = this.points.size();
+            
 
             for (DataPair point : values) {
                 double xp = point.getX();
                 double yp = point.getY();
                 points.add(new DataPair(xp, yp));
             }
-
+            
+            this.nodes = this.points.size();
+            
             SortedByX = new ArrayList<DataPair>();
             SortedByY = new ArrayList<DataPair>();
 
