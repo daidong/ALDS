@@ -4,3 +4,6 @@
 *.jar
 *.war
 *.ear
+/test/ALDS/PublicDataVisitor/
+/test/ALDS/DataType/
+/test/ALDS/XDistTest/
