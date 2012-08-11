@@ -77,8 +77,8 @@ public class EquiPartitionYAxisDist {
             }
             Collections.sort(sortedPoints);
             
-            
-            for (dividerY = reducers; dividerY < B/reducers; dividerY++){
+            int initial = Math.max(reducers, 2);
+            for (dividerY = initial; dividerY < B/initial; dividerY++){
                 i = 0;
                 int equalSliceSize = nodeNumber / dividerY;
                 int currRow = 0;

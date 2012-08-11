@@ -48,7 +48,7 @@ public class OptimalPartitionXAxisDist {
             String pointY = point.split(" ")[1];
             Double X = Double.parseDouble(pointX);
             Double Y = Double.parseDouble(pointY);
-            int k = (int) Math.floor(Y / sliceInterval);
+            int k = (int) Math.floor(X / sliceInterval);
 
             context.write(new IntWritable(k), new DataPair(X, Y));
         }
@@ -81,6 +81,9 @@ public class OptimalPartitionXAxisDist {
             int dividerX = 0;
             int dividerY = 0;
 
+            /**
+             * Nodes = 1Million, Occupy 32M
+             */
             this.points = new ArrayList<DataPair>();
             
 
@@ -92,6 +95,9 @@ public class OptimalPartitionXAxisDist {
             
             this.nodes = this.points.size();
             
+            /**
+             * Nodes = 1Million, Occupy 64M (1Reducers)
+             */
             SortedByX = new ArrayList<DataPair>();
             SortedByY = new ArrayList<DataPair>();
 
@@ -106,14 +112,17 @@ public class OptimalPartitionXAxisDist {
             Collections.sort(this.SortedByY, new DataPairYComparator());
 
             int xpart = B/reducers + 2;
-            System.out.println("XPART: " + xpart);
             
+            /**
+             * xpart = 1024, AllXPart = 1G
+             * xpart = 512,  AllXPart = 128M
+             */
             AllXPart = new int[xpart][xpart][xpart];
             I = new double[xpart][xpart];
             numsGrid = new int[xpart][xpart];
 
-
-            for (dividerY = reducers; dividerY < B / reducers; dividerY++) {
+            int initial = Math.max(reducers, 2);
+            for (dividerY = initial; dividerY < B / initial; dividerY++) {
 
                 dividerX = (int) (B / dividerY);
 
@@ -127,15 +136,10 @@ public class OptimalPartitionXAxisDist {
                     }
                 }
 
-                if (this.XPart == null)
-                    this.XPart = new ArrayList<Integer>();
-                else
-                    this.XPart.clear();
-                
-                if (this.YPart == null)
-                    this.YPart = new ArrayList<Integer>();
-                else 
-                    this.YPart.clear();
+                this.XPart = null;
+                this.YPart = null;
+                this.XPart = new ArrayList<Integer>();
+                this.YPart = new ArrayList<Integer>();
 
                 this.Q.add(this.SortedByY.get(this.nodes - 1).getY());
 
@@ -156,11 +160,12 @@ public class OptimalPartitionXAxisDist {
                         }
                     }
 
-                    this.AllXPart[t][2][0] = XPart.get(0);
+                    this.AllXPart[t][2][0] = 0;
                     this.AllXPart[t][2][1] = sMax;
 
                     //I[t][2] = max;
                     I[t][2] = this.calHP2(t, 2) - this.calHPQ2(t, 2);
+                    System.out.println("I["+t+"][2]: " + I[t][2]);
                 }
 
                 for (int l = 3; l <= dividerX; l++) {
@@ -188,7 +193,7 @@ public class OptimalPartitionXAxisDist {
                         I[t][l] = this.calHP2(t, l) - this.calHPQ2(t, l);
                         //System.out.println("Max: " + max + " I[t][l]: " + I[t][l]);
                         //System.out.println("Max: " + max + " Result: " + I[t][l]);
-                        //System.out.println("I["+t+"]["+l+"]: " + I[t][l]);
+                        System.out.println("I["+t+"]["+l+"]: " + I[t][l]);
                     }
                 }
 
@@ -217,7 +222,7 @@ public class OptimalPartitionXAxisDist {
                     v[i] = this.calHPTotal(i, dividerX) - this.calHPQTotal(i, dividerX);
                     //v[i] = (I[dividerX][i] + HQ) / Math.log(Math.min(dividerX, dividerY));
                     //v[i] = I[dividerX][i];
-                    System.out.println(i + ": " + v[i]);
+                    System.out.println(i + ": " + v[i] + " before: " + this.calHPTotal(i, dividerX) + " later: " + this.calHPQTotal(i, dividerX));
                 }
 
                 MIArray mia = new MIArray(v);
@@ -345,7 +350,7 @@ public class OptimalPartitionXAxisDist {
             for (i = 0; i < l; i++) {
                 currXPart[i] = this.AllXPart[dividerX][l][i];
             }
-            currXPart[i] = dividerX;
+            currXPart[i] = this.XPart.size() - 1;
 
             double overall = this.nodeNum;
 
@@ -367,7 +372,7 @@ public class OptimalPartitionXAxisDist {
             for (i = 0; i < l; i++) {
                 currXPart[i] = this.AllXPart[dividerX][l][i];
             }
-            currXPart[i] = dividerX;
+            currXPart[i] = this.XPart.size() - 1;
 
             double overall = this.nodeNum;
 

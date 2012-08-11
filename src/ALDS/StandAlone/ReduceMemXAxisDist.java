@@ -46,7 +46,7 @@ public class ReduceMemXAxisDist {
     public double MI[][] = null;
     int B = 0;
 
-    public static final String DATA_FILE = "/Users/daidong/Documents/research/ALDS/Code/data.txt";
+    public static final String DATA_FILE = "/Users/daidong/Documents/research/ALDS/Code/random.txt";
     
     public ReduceMemXAxisDist(int b) throws FileNotFoundException, IOException{
         this.points = new ArrayList<DataPair>();
@@ -355,7 +355,7 @@ public class ReduceMemXAxisDist {
         for (i = 0; i < l; i++) {
             currXPart[i] = this.AllXPart[dividerX][l][i];
         }
-        currXPart[i] = dividerX;
+        currXPart[i] = this.XPart.size() - 1;
 
         double overall = this.nodes;
 
@@ -377,7 +377,7 @@ public class ReduceMemXAxisDist {
         for (i = 0; i < l; i++) {
             currXPart[i] = this.AllXPart[dividerX][l][i];
         }
-        currXPart[i] = dividerX;
+        currXPart[i] = this.XPart.size() - 1;
 
         double overall = this.nodes;
 
