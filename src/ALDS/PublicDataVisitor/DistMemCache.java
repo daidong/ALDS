@@ -19,8 +19,8 @@ public class DistMemCache {
     
     public DistMemCache() {
 
-        //host[0] = "219.219.216.40:11211";
-        host[0] = "127.0.0.1:11211";
+        host[0] = "219.219.216.40:11211";
+        //host[0] = "127.0.0.1:11211";
     
         pool = SockIOPool.getInstance();
         pool.setServers(host);

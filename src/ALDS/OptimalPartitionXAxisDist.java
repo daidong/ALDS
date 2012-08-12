@@ -124,6 +124,7 @@ public class OptimalPartitionXAxisDist {
             int initial = Math.max(reducers, 2);
             for (dividerY = initial; dividerY < B / initial; dividerY++) {
 
+                context.progress();
                 dividerX = (int) (B / dividerY);
 
                 this.Q = new ArrayList<Double>();
@@ -165,7 +166,7 @@ public class OptimalPartitionXAxisDist {
 
                     //I[t][2] = max;
                     I[t][2] = this.calHP2(t, 2) - this.calHPQ2(t, 2);
-                    System.out.println("I["+t+"][2]: " + I[t][2]);
+                    //System.out.println("I["+t+"][2]: " + I[t][2]);
                 }
 
                 for (int l = 3; l <= dividerX; l++) {
@@ -193,7 +194,7 @@ public class OptimalPartitionXAxisDist {
                         I[t][l] = this.calHP2(t, l) - this.calHPQ2(t, l);
                         //System.out.println("Max: " + max + " I[t][l]: " + I[t][l]);
                         //System.out.println("Max: " + max + " Result: " + I[t][l]);
-                        System.out.println("I["+t+"]["+l+"]: " + I[t][l]);
+                        //System.out.println("I["+t+"]["+l+"]: " + I[t][l]);
                     }
                 }
 

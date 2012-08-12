@@ -118,6 +118,10 @@ public class OptimalPartitionXAxisJoin {
             for (int j = 0; j < mappers; j++)
                 IndexArray[j] = 1;
             
+            DistMemCache distRead = new DistMemCache();
+            double hq = Double.parseDouble((String)distRead.get("HQ"+dividerY));
+            
+            long time = System.currentTimeMillis();
             do{
                 double sum = 0.0;
                 int index = 0;
@@ -132,13 +136,22 @@ public class OptimalPartitionXAxisJoin {
                 
                 if (index <= dividerX && sum > MaxMI[index]){
                     MaxMI[index] = sum;
+                    double v = (sum + hq) / Math.log(Math.min(dividerX, dividerY));
+                    if (Math.abs(v - 1) <= 0.001 || v > 1){
+                        System.out.println("Get Max MI. DividerX: " + index + " DividerY: " + dividerY + " value: " + v);
+                        break;
+                    }
                     //System.out.println("Index: " + index + " maximum is " + sum);
+                }
+                
+                long currTime = System.currentTimeMillis();
+                if ((currTime - time) > 60 * 1000){
+                    time = currTime;
+                    context.progress();
                 }
                 
             } while (!increase(IndexArray));
             
-            DistMemCache distRead = new DistMemCache();
-            double hq = Double.parseDouble((String)distRead.get("HQ"+dividerY));
             
             double v[] = new double[dividerX + 1];
             for (int j = 0; j <= dividerX; j++)
@@ -148,7 +161,7 @@ public class OptimalPartitionXAxisJoin {
             for (int iIndex = mappers; iIndex <= dividerX; iIndex++) {
                 v[iIndex] = (MaxMI[iIndex] + hq)/Math.log(Math.min(dividerX, dividerY));
                 //v[iIndex] = MaxMI[iIndex];
-                System.out.println(iIndex + ": " + v[iIndex]);
+                //System.out.println(iIndex + ": " + v[iIndex]);
             }
             
             MIArray result = new MIArray(v);
