@@ -140,6 +140,11 @@ public class OptimalPartitionXAxisJoin {
                     if ((currTime - time) > 60 * 1000) {
                         time = currTime;
                         context.progress();
+                        System.out.println("Current Calculate, dividerX: " + dividerX + " dividerY: " + dividerY);
+                        for (int w = 0; w < mappers; w++){
+                            System.out.print(" " + IndexArray[w]);
+                        }
+                        System.out.println("");
                     }
                 } while (!increase(IndexArray, endStep));
             }
