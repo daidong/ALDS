@@ -148,7 +148,7 @@ public class Driver{
 
         XJoinJob.setMapperClass(OptimalPartitionXAxisJoin.MapClassX2.class);
         XJoinJob.setReducerClass(OptimalPartitionXAxisJoin.ReduceClassX2.class);
-        XJoinJob.setNumReduceTasks(Driver.reducers);
+        XJoinJob.setNumReduceTasks(Driver.reducers * 2);
 
         XJoinJob.setInputFormatClass(SequenceFileInputFormat.class);
         XJoinJob.setMapOutputKeyClass(IntWritable.class);
