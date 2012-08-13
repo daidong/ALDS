@@ -107,47 +107,44 @@ public class OptimalPartitionXAxisJoin {
             }
 
             double hq = 0.0;
-            int eachStep = dividerX / mappers / mappers;
-            for (int step = 0; step < mappers; step++) {
-                int startStep = step * eachStep + 1;
-                int endStep = (step + 1) * eachStep;
-                int IndexArray[] = new int[mappers];
-                for (int j = 0; j < mappers; j++) {
-                    IndexArray[j] = startStep;
-                }
 
-                DistMemCache distRead = new DistMemCache();
-                hq = Double.parseDouble((String) distRead.get("HQ" + dividerY));
 
-                long time = System.currentTimeMillis();
-                do {
-                    double sum = 0.0;
-                    int index = 0;
-
-                    for (int j = 0; j < mappers; j++) {
-                        sum += MI[IndexArray[j]][j];
-                        index += IndexArray[j];
-                    }
-                    if (index <= dividerX && sum > MaxMI[index]) {
-                        MaxMI[index] = sum;
-                        double v = (sum + hq) / Math.log(Math.min(dividerX, dividerY));
-                        if (Math.abs(v - 1) <= 0.1 || v > 1) {
-                            System.out.println("Get Max MI. DividerX: " + index + " DividerY: " + dividerY + " value: " + v);
-                            break;
-                        }
-                    }
-                    long currTime = System.currentTimeMillis();
-                    if ((currTime - time) > 60 * 1000) {
-                        time = currTime;
-                        context.progress();
-                        System.out.println("Current Calculate, dividerX: " + dividerX + " dividerY: " + dividerY);
-                        for (int w = 0; w < mappers; w++){
-                            System.out.print(" " + IndexArray[w]);
-                        }
-                        System.out.println("");
-                    }
-                } while (!increase(IndexArray, endStep));
+            int IndexArray[] = new int[mappers];
+            for (int j = 0; j < mappers; j++) {
+                IndexArray[j] = 1;
             }
+
+            DistMemCache distRead = new DistMemCache();
+            hq = Double.parseDouble((String) distRead.get("HQ" + dividerY));
+
+            long time = System.currentTimeMillis();
+            do {
+                double sum = 0.0;
+                int index = 0;
+
+                for (int j = 0; j < mappers; j++) {
+                    sum += MI[IndexArray[j]][j];
+                    index += IndexArray[j];
+                }
+                if (index <= dividerX && sum > MaxMI[index]) {
+                    MaxMI[index] = sum;
+                    double v = (sum + hq) / Math.log(Math.min(dividerX, dividerY));
+                    if (Math.abs(v - 1) <= 0.1 || v > 1) {
+                        System.out.println("Get Max MI. DividerX: " + index + " DividerY: " + dividerY + " value: " + v);
+                        break;
+                    }
+                }
+                long currTime = System.currentTimeMillis();
+                if ((currTime - time) > 60 * 1000) {
+                    time = currTime;
+                    context.progress();
+                    System.out.println("Current Calculate, dividerX: " + dividerX + " dividerY: " + dividerY);
+                    for (int w = 0; w < mappers; w++) {
+                        System.out.print(" " + IndexArray[w]);
+                    }
+                    System.out.println("");
+                }
+            } while (!increase(IndexArray, dividerX));
 
             double v[] = new double[dividerX + 1];
             for (int j = 0; j <= dividerX; j++) {
