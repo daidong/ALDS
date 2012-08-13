@@ -129,11 +129,13 @@ public class OptimalPartitionXAxisJoin {
                     }
                     if (index <= dividerX && sum > MaxMI[index]) {
                         MaxMI[index] = sum;
+                        /*
                         double v = (sum + hq) / Math.log(Math.min(dividerX, dividerY));
                         if (Math.abs(v - 1) <= 0.1 || v > 1) {
                             System.out.println("Get Max MI. DividerX: " + index + " DividerY: " + dividerY + " value: " + v);
                             break;
                         }
+                         */
                     }
                     long currTime = System.currentTimeMillis();
                     if ((currTime - time) > 60 * 1000) {
