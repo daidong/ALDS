@@ -163,8 +163,6 @@ public class OptimalPartitionXAxisJoin {
 
             MIArray result = new MIArray(v);
 
-            System.out.println("MaxMI for " + dividerY);
-
             context.write(new IntWritable(dividerY), result);
         }
     }
