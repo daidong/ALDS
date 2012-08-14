@@ -60,7 +60,9 @@ public class OptimalPartitionXAxisDist {
         private ArrayList<Double> Q = null;
         private ArrayList<Integer> XPart = null;
         private ArrayList<Integer> YPart = null;
-        int AllXPart[][][] = null;
+        int aXPart[][] = null;
+        int bXPart[][] = null;
+        //int AllXPart[][][] = null;
         double I[][] = null;
         int numsGrid[][] = null;
         DistMemCache distRead = new DistMemCache();
@@ -68,7 +70,6 @@ public class OptimalPartitionXAxisDist {
         ArrayList<DataPair> SortedByX = null;
         ArrayList<DataPair> SortedByY = null;
         int nodes = 0;
-        
 
         @Override
         public void reduce(IntWritable k, Iterable<DataPair> values, Context context) throws IOException, InterruptedException {
@@ -85,16 +86,16 @@ public class OptimalPartitionXAxisDist {
              * Nodes = 1Million, Occupy 32M
              */
             this.points = new ArrayList<DataPair>();
-            
+
 
             for (DataPair point : values) {
                 double xp = point.getX();
                 double yp = point.getY();
                 points.add(new DataPair(xp, yp));
             }
-            
+
             this.nodes = this.points.size();
-            
+
             /**
              * Nodes = 1Million, Occupy 64M (1Reducers)
              */
@@ -111,13 +112,15 @@ public class OptimalPartitionXAxisDist {
             Collections.sort(this.SortedByX, new DataPairXComparator());
             Collections.sort(this.SortedByY, new DataPairYComparator());
 
-            int xpart = B/reducers + 2;
-            
+            int xpart = B / reducers + 2;
+
             /**
              * xpart = 1024, AllXPart = 1G
              * xpart = 512,  AllXPart = 128M
              */
-            AllXPart = new int[xpart][xpart][xpart];
+            //AllXPart = new int[xpart][xpart][xpart];
+            aXPart = new int[xpart][xpart];
+            bXPart = new int[xpart][xpart];
             I = new double[xpart][xpart];
             numsGrid = new int[xpart][xpart];
 
@@ -161,8 +164,10 @@ public class OptimalPartitionXAxisDist {
                         }
                     }
 
-                    this.AllXPart[t][2][0] = 0;
-                    this.AllXPart[t][2][1] = sMax;
+                    //this.AllXPart[t][2][0] = 0;
+                    //this.AllXPart[t][2][1] = sMax;
+                    this.aXPart[t][0] = 0;
+                    this.aXPart[t][1] = sMax;
 
                     //I[t][2] = max;
                     I[t][2] = this.calHP2(t, 2) - this.calHPQ2(t, 2);
@@ -186,9 +191,15 @@ public class OptimalPartitionXAxisDist {
                         }
 
                         for (int p = 0; p < l; p++) {
-                            this.AllXPart[t][l][p] = this.AllXPart[sMax][l - 1][p];
+                            this.bXPart[t][p] = this.aXPart[sMax][p];
+                            //this.AllXPart[t][l][p] = this.AllXPart[sMax][l - 1][p];
                         }
-                        this.AllXPart[t][l][l - 1] = t;
+                        //this.AllXPart[t][l][l - 1] = t;
+                        this.bXPart[t][l - 1] = t;
+
+                        for (int p = 0; p < l; p++) {
+                            this.aXPart[t][p] = this.bXPart[t][p];
+                        }
 
                         //I[t][l] = max;
                         I[t][l] = this.calHP2(t, l) - this.calHPQ2(t, l);
@@ -197,23 +208,7 @@ public class OptimalPartitionXAxisDist {
                         //System.out.println("I["+t+"]["+l+"]: " + I[t][l]);
                     }
                 }
-
-                for (int i = this.XPart.size(); i <= dividerX; i++) {
-
-                    for (int d = 2; d <= dividerX; d++) {
-
-                        for (int j = 0; j < this.XPart.size(); j++) {
-
-                            this.AllXPart[i][d][j] = this.AllXPart[this.XPart.size() - 1][d][j];
-
-                        }
-                    }
-
-                    for (int j = 0; j < this.XPart.size(); j++) {
-                        I[i][j] = I[this.XPart.size() - 1][j];
-                    }
-                }
-
+                
                 System.out.println("XPart: " + this.XPart.size() + " dividerX: " + dividerX);
                 System.out.println("YPart: " + this.YPart.size() + " dividerY: " + dividerY);
 
@@ -223,7 +218,7 @@ public class OptimalPartitionXAxisDist {
                     v[i] = this.calHPTotal(i, dividerX) - this.calHPQTotal(i, dividerX);
                     //v[i] = (I[dividerX][i] + HQ) / Math.log(Math.min(dividerX, dividerY));
                     //v[i] = I[dividerX][i];
-                    System.out.println(i + ": " + v[i] + " before: " + this.calHPTotal(i, dividerX) + " later: " + this.calHPQTotal(i, dividerX));
+                    //System.out.println(i + ": " + v[i] + " before: " + this.calHPTotal(i, dividerX) + " later: " + this.calHPQTotal(i, dividerX));
                 }
 
                 MIArray mia = new MIArray(v);
@@ -282,7 +277,7 @@ public class OptimalPartitionXAxisDist {
                     this.XPart.add(i);
                     currCol++;
                     currSize = count;
-                    desiredColSize = (this.nodes - i - 1) / ((xs- currCol) == 0 ? 1 : (xs - currCol));
+                    desiredColSize = (this.nodes - i - 1) / ((xs - currCol) == 0 ? 1 : (xs - currCol));
                 } else {
                     currSize += count;
                 }
@@ -349,7 +344,8 @@ public class OptimalPartitionXAxisDist {
             int i = 0;
             int currXPart[] = new int[l + 1];
             for (i = 0; i < l; i++) {
-                currXPart[i] = this.AllXPart[dividerX][l][i];
+                currXPart[i] = this.aXPart[dividerX][i];
+                //currXPart[i] = this.AllXPart[dividerX][l][i];
             }
             currXPart[i] = this.XPart.size() - 1;
 
@@ -371,7 +367,8 @@ public class OptimalPartitionXAxisDist {
             int currXPart[] = new int[l + 1];
             int i = 0;
             for (i = 0; i < l; i++) {
-                currXPart[i] = this.AllXPart[dividerX][l][i];
+                currXPart[i] = this.aXPart[dividerX][i];
+                //currXPart[i] = this.AllXPart[dividerX][l][i];
             }
             currXPart[i] = this.XPart.size() - 1;
 
@@ -395,7 +392,8 @@ public class OptimalPartitionXAxisDist {
             int i = 0;
             int currXPart[] = new int[l + 1];
             for (i = 0; i < l; i++) {
-                currXPart[i] = this.AllXPart[t][l][i];
+                currXPart[i] = this.aXPart[t][i];
+                //currXPart[i] = this.AllXPart[t][l][i];
             }
             currXPart[i] = t;
 
@@ -419,7 +417,8 @@ public class OptimalPartitionXAxisDist {
             int currXPart[] = new int[l + 1];
             int i = 0;
             for (i = 0; i < l; i++) {
-                currXPart[i] = this.AllXPart[t][l][i];
+                currXPart[i] = this.aXPart[t][i];
+                //currXPart[i] = this.AllXPart[t][l][i];
             }
             currXPart[i] = t;
 
@@ -559,8 +558,6 @@ public class OptimalPartitionXAxisDist {
             return this.YPart.get(rowth) - this.YPart.get(rowth - 1);
         }
 
-        
-
         private int countBeforeXAndYth(int col, int rowth) {
             int count = 0;
             for (int i = 1; i <= col; i++) {
@@ -600,69 +597,68 @@ public class OptimalPartitionXAxisDist {
                 }
             }
         }
-        
         /*
-         private int countBeforeXAndYth2(int col, int rowth) {
-            int count = 0;
-            if (col < 1) {
-                return 0;
-            }
-            if (col >= XPart.size()) {
-                col = XPart.size() - 1;
-            }
-
-            if (rowth < 1 || rowth >= YPart.size()) {
-                return 0;
-            }
-
-            int startX = this.XPart.get(0);
-            int endX = this.XPart.get(col);
-
-            double startY = this.SortedByY.get(this.YPart.get(rowth - 1)).getY();
-            double endY = this.SortedByY.get(this.YPart.get(rowth)).getY();
-
-            for (int i = startX; i < endX; i++) {
-                double curr = this.SortedByX.get(i).getY();
-                if (curr > startY && curr <= endY) {
-                    count++;
-                }
-            }
-            return count;
+        private int countBeforeXAndYth2(int col, int rowth) {
+        int count = 0;
+        if (col < 1) {
+        return 0;
         }
-
+        if (col >= XPart.size()) {
+        col = XPart.size() - 1;
+        }
+        
+        if (rowth < 1 || rowth >= YPart.size()) {
+        return 0;
+        }
+        
+        int startX = this.XPart.get(0);
+        int endX = this.XPart.get(col);
+        
+        double startY = this.SortedByY.get(this.YPart.get(rowth - 1)).getY();
+        double endY = this.SortedByY.get(this.YPart.get(rowth)).getY();
+        
+        for (int i = startX; i < endX; i++) {
+        double curr = this.SortedByX.get(i).getY();
+        if (curr > startY && curr <= endY) {
+        count++;
+        }
+        }
+        return count;
+        }
+        
         private int countXYth2(int colth, int rowth) {
-            if (colth < 1 || colth >= XPart.size()) {
-                return 0;
-            }
-            if (rowth < 1 || rowth >= YPart.size()) {
-                return 0;
-            }
-
-            double startX = this.SortedByX.get(this.XPart.get(colth - 1)).getX();
-            double endX = this.SortedByX.get(this.XPart.get(colth)).getX();
-
-            double startY = this.SortedByY.get(this.YPart.get(rowth - 1)).getY();
-            double endY = this.SortedByY.get(this.YPart.get(rowth)).getY();
-
-            int count = 0;
-
-            if (countXth(colth) < countYth(rowth)) {
-                for (int i = this.XPart.get(colth - 1); i < this.XPart.get(colth); i++) {
-                    if (this.SortedByX.get(i).getY() > startY
-                            && this.SortedByX.get(i).getY() <= endY) {
-                        count++;
-                    }
-                }
-            } else {
-                for (int i = this.YPart.get(rowth - 1); i < this.YPart.get(rowth); i++) {
-                    if (this.SortedByY.get(i).getX() > startX
-                            && this.SortedByY.get(i).getX() <= endX) {
-                        count++;
-                    }
-                }
-            }
-            return count;
+        if (colth < 1 || colth >= XPart.size()) {
+        return 0;
         }
-        */
+        if (rowth < 1 || rowth >= YPart.size()) {
+        return 0;
+        }
+        
+        double startX = this.SortedByX.get(this.XPart.get(colth - 1)).getX();
+        double endX = this.SortedByX.get(this.XPart.get(colth)).getX();
+        
+        double startY = this.SortedByY.get(this.YPart.get(rowth - 1)).getY();
+        double endY = this.SortedByY.get(this.YPart.get(rowth)).getY();
+        
+        int count = 0;
+        
+        if (countXth(colth) < countYth(rowth)) {
+        for (int i = this.XPart.get(colth - 1); i < this.XPart.get(colth); i++) {
+        if (this.SortedByX.get(i).getY() > startY
+        && this.SortedByX.get(i).getY() <= endY) {
+        count++;
+        }
+        }
+        } else {
+        for (int i = this.YPart.get(rowth - 1); i < this.YPart.get(rowth); i++) {
+        if (this.SortedByY.get(i).getX() > startX
+        && this.SortedByY.get(i).getX() <= endX) {
+        count++;
+        }
+        }
+        }
+        return count;
+        }
+         */
     }
 }
