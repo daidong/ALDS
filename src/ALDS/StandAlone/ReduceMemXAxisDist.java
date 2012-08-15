@@ -43,7 +43,7 @@ public class ReduceMemXAxisDist {
     int numsGrid[][] = null;
     public double MI[][] = null;
     int B = 0;
-    public static final String DATA_FILE = "/Users/daidong/Documents/research/ALDS/Code/linear.txt";
+    public static final String DATA_FILE = "/Users/daidong/Documents/research/ALDS/Code/x.txt";
 
     public ReduceMemXAxisDist(int b) throws FileNotFoundException, IOException {
         this.points = new ArrayList<DataPair>();

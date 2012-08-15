@@ -98,16 +98,31 @@ public class OptimalPartitionXAxisJoin {
                 }
             }
 
+            double max[] = new double[mappers];
+            for (int i = 0; i < mappers; i++){
+                max[i] = 0 - Double.MAX_VALUE;
+            }
+            
             for (MIArrayWithKey every : values) {
                 double[] db = every.getArray().get();
                 int kIndex = every.getKey();
                 for (int j = 1; j < db.length; j++) {
                     MI[j][kIndex] = db[j];
+                    if (db[j] > max[kIndex])
+                        max[kIndex] = db[j];
                 }
             }
-
+            
             double hq = 0.0;
-
+            DistMemCache distRead = new DistMemCache();
+            hq = Double.parseDouble((String) distRead.get("HQ" + dividerY));
+            
+            double v = 0.0;
+            for (int i = 0; i < mappers; i++){
+                v += max[i];
+            }
+            System.out.println("Max Value: " + (v + hq) / Math.log(Math.min(dividerX, dividerY)));
+            /*
             for (int start = 1; start < Math.ceil(dividerX / mappers); start++) {
                 int end = start + 1;
                 int IndexArray[] = new int[mappers];
@@ -129,13 +144,11 @@ public class OptimalPartitionXAxisJoin {
                     }
                     if (index <= dividerX && sum > MaxMI[index]) {
                         MaxMI[index] = sum;
-                        /*
                         double v = (sum + hq) / Math.log(Math.min(dividerX, dividerY));
                         if (Math.abs(v - 1) <= 0.1 || v > 1) {
                             System.out.println("Get Max MI. DividerX: " + index + " DividerY: " + dividerY + " value: " + v);
                             break;
                         }
-                         */
                     }
                     long currTime = System.currentTimeMillis();
                     if ((currTime - time) > 60 * 1000) {
@@ -149,6 +162,7 @@ public class OptimalPartitionXAxisJoin {
                     }
                 } while (!increase(IndexArray, dividerX));
             }
+             
 
             double v[] = new double[dividerX + 1];
             for (int j = 0; j <= dividerX; j++) {
@@ -158,13 +172,12 @@ public class OptimalPartitionXAxisJoin {
             System.out.println("For DividerY: " + dividerY);
             for (int iIndex = mappers; iIndex <= dividerX; iIndex++) {
                 v[iIndex] = (MaxMI[iIndex] + hq) / Math.log(Math.min(dividerX, dividerY));
-                //v[iIndex] = MaxMI[iIndex];
-                //System.out.println(iIndex + ": " + v[iIndex]);
             }
 
             MIArray result = new MIArray(v);
 
             context.write(new IntWritable(dividerY), result);
+             */
         }
     }
 }
